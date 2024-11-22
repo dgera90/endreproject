@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Feltöltése</title>
+    <style>
+        /* Alap stílusok */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f9f4;  /* Zöldes háttér */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #2e7d32; /* Zöld szín a főcímen */
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Formázás a fájl feltöltési űrlaphoz */
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #2e7d32; /* Zöld szegély, ha fölé viszed az egeret */
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #388e3c; /* Zöld szín */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2e7d32; /* Sötétebb zöld árnyalat a hover-hatásra */
+        }
+
+        /* Eredmény táblázat stílusa */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #e8f5e9;  /* Zöldes háttér a fejlécnek */
+        }
+
+        td {
+            background-color: #ffffff;
+        }
+
+        /* Felugró ablak stílus */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Mobil optimalizálás */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            input[type="file"] {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 10px 20px;
+            }
+
+            table {
+                width: 100%;
+                font-size: 14px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>CSV fájl feltöltése</h1>
+
+        <!-- Feltöltés űrlap -->
+        <form action="/process" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit">Feldolgozás</button>
+        </form>
+
+        <!-- Eredmény táblázat -->
+        {% if result %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Termék Név</th>
+                        <th>Összes Mennyiség</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in result %}
+                        <tr>
+                            <td>{{ row['Termék Név'] }}</td>
+                            <td>{{ row['Összes Mennyiség'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Letöltés gombok -->
+            <div style="text-align: center; margin-top: 20px;">
+                <form action="/download_csv" method="post" style="display: inline;">
+                    <button type="submit">Letöltés CSV</button>
+                </form>
+                <form action="/download_excel" method="post" style="display: inline;">
+                    <button type="submit">Letöltés Excel</button>
+                </form>
+            </div>
+        {% endif %}
+
+        <!-- Felugró ablak, ha hiba történik -->
+        {% if error_message %}
+            <div id="errorModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <p>{{ error_message }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Ha van hibaüzenet, akkor nyisd meg a modalt
+        {% if error_message %}
+            var modal = document.getElementById("errorModal");
+            modal.style.display = "block";
+        {% endif %}
+
+        // A modal bezárása
+        function closeModal() {
+            var modal = document.getElementById("errorModal");
+            modal.style.display = "none";
+        }
+    </script>
+
+</body>
+</html>
